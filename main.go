@@ -23,19 +23,19 @@ import (
 
 var (
 	// version will be set by goreleaser to release tag when building
-	v = "master"
+	version = "master"
 
 	// command options
-	author  = flag.String("author", "", "the commit author")
-	skip    = flag.String("skip", "60m", "skip commits with larger delta than this")
-	version = flag.Bool("v", false, "print the current version")
+	author = flag.String("author", "", "the commit author")
+	skip   = flag.String("skip", "60m", "skip commits with larger delta than this")
+	v      = flag.Bool("v", false, "print the current version")
 )
 
 func main() {
 	flag.Parse()
 
-	if *version {
-		fmt.Println(v)
+	if *v {
+		fmt.Println(version)
 		os.Exit(0)
 	}
 
