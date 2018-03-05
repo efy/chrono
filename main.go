@@ -12,6 +12,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -32,20 +34,17 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *author == "" {
-		fmt.Println("author must be provided")
-		os.Exit(1)
-	}
-
 	opts := logOpts{
 		author: *author,
 	}
 
-	_, err := log(opts)
+	commits, err := log(opts)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	fmt.Println(commits)
 }
 
 type logOpts struct {
@@ -54,10 +53,26 @@ type logOpts struct {
 
 type commit struct {
 	date time.Time
+	line string // the commit line
 }
 
-// Call git log with format pretty and parse into commits
+// Call git log with custom format and parse into commits
 func log(opts logOpts) ([]commit, error) {
 	var commits []commit
+
+	cmd := "git"
+	args := []string{"log", "--format='%H %ct'"}
+
+	out, err := exec.Command(cmd, args...).Output()
+	if err != nil {
+		return commits, err
+	}
+
+	lines := strings.Split(string(out), "\n")
+
+	for _, line := range lines {
+		commits = append(commits, commit{line: line})
+	}
+
 	return commits, nil
 }
