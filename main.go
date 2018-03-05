@@ -5,6 +5,8 @@
 //	24 days
 //	% chrono -author=some.guy@acme.com
 //	12 days
+//	% chrono -author=some.guy@acme.com -skip=30m
+//	3 days
 //	%
 package main
 
