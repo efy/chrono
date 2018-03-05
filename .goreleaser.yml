@@ -1,5 +1,5 @@
 builds:
-  - binary: temple
+  - binary: chrono
     goos:
       - windows
       - darwin
