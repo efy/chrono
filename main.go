@@ -25,6 +25,7 @@ var (
 
 	// command options
 	author  = flag.String("author", "", "the commit author")
+	skip    = flag.String("skip", "60m", "skip commits with larger delta than this")
 	version = flag.Bool("v", false, "print the current version")
 )
 
@@ -40,17 +41,38 @@ func main() {
 		author: *author,
 	}
 
+	skip, err := time.ParseDuration(*skip)
+	if err != nil {
+		fmt.Println("invalid value for skip")
+		os.Exit(1)
+	}
+
 	commits, err := log(opts)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	for _, c := range commits {
-		fmt.Println(c.hash)
-		fmt.Println(c.time)
-		fmt.Println()
+	var dur time.Duration
+
+	for i, _ := range commits {
+		var curr, next commit
+		curr = commits[i]
+
+		if i < len(commits)-1 {
+			next = commits[i+1]
+		} else {
+			break
+		}
+
+		delta := curr.time.Sub(next.time)
+
+		if delta < skip {
+			dur = dur + delta
+		}
 	}
+
+	fmt.Println(dur)
 }
 
 type logOpts struct {
@@ -80,7 +102,6 @@ func log(opts logOpts) ([]commit, error) {
 	for _, line := range lines {
 		c, err := parseCommitLine(line)
 		if err != nil {
-			fmt.Println(err)
 			continue
 		}
 		commits = append(commits, c)
@@ -89,6 +110,7 @@ func log(opts logOpts) ([]commit, error) {
 	return commits, nil
 }
 
+// Parses a line from custom format into a commit struct
 func parseCommitLine(line string) (commit, error) {
 	c := commit{
 		raw: line,
@@ -96,7 +118,7 @@ func parseCommitLine(line string) (commit, error) {
 	parts := strings.Split(line, " ")
 
 	if len(parts) != 2 {
-		return c, errors.New("commit line could not be parsed")
+		return c, errors.New("commit line could not be parsed: unexpected format")
 	}
 
 	c.hash = parts[0]
