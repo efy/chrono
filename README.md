@@ -1,12 +1,12 @@
 
 # Chrono
 
-Tool for extracting time from git log
+Tool for extracting time from git log.
 
 # Installation
 
-Grab the binary from release's page for you architecture and place it on your
-`PATH`
+Grab the latest binary from [releases](https://github.com/efy/chrono/releases) page for your architecture and place it 
+somewhere on your `PATH`.
 
 # Usage
 
@@ -18,4 +18,4 @@ chrono -author={name}
 # Licensing
 
 The code in this project is licensed under MIT license. See the
-[LICENSE](LISENSE) file for more details.
+[LICENSE](LICENSE) file for more details.
