@@ -92,6 +92,11 @@ func log(opts logOpts) ([]commit, error) {
 	cmd := "git"
 	args := []string{"log", "--format=%H %ct"}
 
+	if opts.author != "" {
+		aa := "--author=" + opts.author
+		args = append(args, aa)
+	}
+
 	out, err := exec.Command(cmd, args...).Output()
 	if err != nil {
 		return commits, err
