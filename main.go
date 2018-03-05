@@ -1,3 +1,11 @@
+// Chrono estimates the time spent on a project by
+// inspecting the git log.
+//
+//	% chrono
+//	24 days
+//	% chrono -author=some.guy@acme.com
+//	12 days
+//	%
 package main
 
 import (
