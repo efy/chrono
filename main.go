@@ -9,10 +9,12 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -44,7 +46,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(commits)
+	for _, c := range commits {
+		fmt.Println(c.hash)
+		fmt.Println(c.time)
+		fmt.Println()
+	}
 }
 
 type logOpts struct {
@@ -52,8 +58,9 @@ type logOpts struct {
 }
 
 type commit struct {
-	date time.Time
-	line string // the commit line
+	time time.Time
+	hash string
+	raw  string // raw commit line from git log --format={...}
 }
 
 // Call git log with custom format and parse into commits
@@ -61,7 +68,7 @@ func log(opts logOpts) ([]commit, error) {
 	var commits []commit
 
 	cmd := "git"
-	args := []string{"log", "--format='%H %ct'"}
+	args := []string{"log", "--format=%H %ct"}
 
 	out, err := exec.Command(cmd, args...).Output()
 	if err != nil {
@@ -71,8 +78,35 @@ func log(opts logOpts) ([]commit, error) {
 	lines := strings.Split(string(out), "\n")
 
 	for _, line := range lines {
-		commits = append(commits, commit{line: line})
+		c, err := parseCommitLine(line)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		commits = append(commits, c)
 	}
 
 	return commits, nil
+}
+
+func parseCommitLine(line string) (commit, error) {
+	c := commit{
+		raw: line,
+	}
+	parts := strings.Split(line, " ")
+
+	if len(parts) != 2 {
+		return c, errors.New("commit line could not be parsed")
+	}
+
+	c.hash = parts[0]
+
+	i, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil {
+		return c, err
+	}
+
+	c.time = time.Unix(i, 0)
+
+	return c, nil
 }
